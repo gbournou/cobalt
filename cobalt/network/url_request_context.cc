@@ -65,9 +65,12 @@ const char kQUICToggleCommandLongHelp[] =
     "enabled or not. The new value will apply for new streams.";
 #endif  // defined(ENABLE_DEBUGGER)
 
+const char kClientHintsEnabledPersistentSettingsKey[] = "clientHintsEnabled";
+
 }  // namespace
 
 URLRequestContext::URLRequestContext(
+    const net::HttpRequestHeaders& client_hint_headers,
     storage::StorageManager* storage_manager, const std::string& custom_proxy,
     net::NetLog* net_log, bool ignore_certificate_errors,
     scoped_refptr<base::SequencedTaskRunner> network_task_runner,
@@ -206,6 +209,16 @@ URLRequestContext::URLRequestContext(
     }
 
     storage_.set_http_transaction_factory(std::move(http_cache));
+  }
+
+  // Bring in any client hint headers as long as the setting isn't disabled.
+  // |http_client_hint_headers_| is defined in parent net::URLRequestContext.
+  if (persistent_settings == nullptr ||
+      persistent_settings->GetPersistentSettingAsBool(
+          kClientHintsEnabledPersistentSettingsKey, true)) {
+    http_client_hint_headers_ = client_hint_headers;
+  } else {
+    http_client_hint_headers_.Clear();
   }
 
   auto* job_factory = new net::URLRequestJobFactoryImpl();

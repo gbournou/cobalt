@@ -22,6 +22,7 @@
 #include "base/sequence_checker.h"
 #include "cobalt/persistent_storage/persistent_settings.h"
 #include "net/cookies/cookie_monster.h"
+#include "net/http/http_request_headers.h"
 #include "net/log/net_log.h"
 #include "net/url_request/url_request_context.h"
 #include "net/url_request/url_request_context_getter.h"
@@ -41,6 +42,7 @@ namespace network {
 class URLRequestContext : public net::URLRequestContext {
  public:
   URLRequestContext(
+      const net::HttpRequestHeaders& client_hint_headers,
       storage::StorageManager* storage_manager, const std::string& custom_proxy,
       net::NetLog* net_log, bool ignore_certificate_errors,
       scoped_refptr<base::SequencedTaskRunner> network_task_runner,
